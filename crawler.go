@@ -1,12 +1,14 @@
 package main
 
 import (
-    "fmt"
+    "path"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
-    "golang.org/x/net/html"
+	"golang.org/x/net/html"
 )
 
 func main() {
@@ -43,6 +45,14 @@ func crawl(u *url.URL) []url.URL {
                     if new_url_err != nil {
                         panic(new_url_err)
                     }
+                    if strings.HasPrefix(new_url.String(), "#") {
+                        break
+                    }
+                    if new_url.Host == "" {
+                        rel_path := new_url.Path
+                        new_url, _ = url.Parse(u.String())
+                        new_url.Path = path.Join(u.Path, rel_path)
+                    }
                     results = append(results, *new_url)
                 }
             }
@@ -54,3 +64,4 @@ func crawl(u *url.URL) []url.URL {
     f(doc)
     return results
 }
+
